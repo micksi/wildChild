@@ -30,13 +30,26 @@ public class SelectiveBlur : MonoBehaviour {
 		} 
 	}
 
-	void OnRenderImage(RenderTexture source, RenderTexture dest)
+	private Vector2 GetNormalizedFocus()
+	{
+		// For now, use mouse pos:
+		return GetNormalizedMousePosition();
+	}
+
+	private Vector2 GetNormalizedMousePosition()
 	{
 		float mouseX = Input.mousePosition.x / Screen.width;
 		float mouseY = Input.mousePosition.y / Screen.height;
-		//Debug.Log(mouseX + ", " + mouseY);
-		material.SetFloat("_FocusX", mouseX);
-		material.SetFloat("_FocusY", mouseY);
+
+		return new Vector2(mouseX, mouseY);
+	}
+
+	void OnRenderImage(RenderTexture source, RenderTexture dest)
+	{
+		Vector2 focus = GetNormalizedFocus();
+
+		material.SetFloat("_FocusX", focus.x);
+		material.SetFloat("_FocusY", focus.y);
 		Graphics.Blit(source, dest, material);
 	}
 }
