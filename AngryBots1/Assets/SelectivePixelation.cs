@@ -9,7 +9,7 @@ public class SelectivePixelation : MonoBehaviour {
 
 	public float effectStartDistance = 0.2f;
 	public float effectMaxDistance = 0.5f;
-	public float downsampleFactor = 2f;
+	public float downsampleFactor = 8f;
 
 	void Update()
 	{
