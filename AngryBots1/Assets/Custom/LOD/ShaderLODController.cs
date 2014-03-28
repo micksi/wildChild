@@ -5,35 +5,25 @@ public class ShaderLODController : MonoBehaviour {
 
 	private Shader shader;
 
-	public int tempThresholdPixelCount = 200;
+	public int tempThresholdPixelCount = 300;
+	public int tempThresholdPixelCount2 = 150;
+
 
 	// Use this for initialization
 	void Start () {
 		shader = renderer.material.shader;
 	}
 
-	/*private float GetDistanceToFocus()
-	{
-		//Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-		//Vector2 focusPos = FocusProvider.GetFocusPosition();
-
-		return FocusProvider.GetFocusDistance(transform.position);
-
-		//return (focusPos - screenPos).magnitude;
-	}
-*/
-	/*private Vector3 GetFocusPosition()
-	{
-		// Use mouse position for now
-		return Input.mousePosition;
-	}*/
-
 	private int DetermineWantedLOD()
 	{
-		float distanceToFocus = FocusProvider.GetFocusDistance(transform.position);//GetDistanceToFocus();
-		if(distanceToFocus < tempThresholdPixelCount)
+		float distanceToFocus = FocusProvider.GetFocusDistance(transform.position);
+		if(distanceToFocus < tempThresholdPixelCount2)
 		{
 			return 200;
+		}
+		else if(distanceToFocus < tempThresholdPixelCount)
+		{
+			return 100;
 		}
 		else
 		{
@@ -50,7 +40,7 @@ public class ShaderLODController : MonoBehaviour {
 
 		shader.maximumLOD = DetermineWantedLOD();
 		return;
-
+/*
 		if(Input.GetKeyDown("z"))
 		{
 			shader.maximumLOD = 200;
@@ -61,5 +51,5 @@ public class ShaderLODController : MonoBehaviour {
 			shader.maximumLOD = 50;
 			print("max lod 50");
 		}
-	}
+*/	}
 }
