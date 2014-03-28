@@ -12,23 +12,25 @@ public class ShaderLODController : MonoBehaviour {
 		shader = renderer.material.shader;
 	}
 
-	private float GetDistanceToFocus()
+	/*private float GetDistanceToFocus()
 	{
-		Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-		Vector3 focusPos = GetFocusPosition();
+		//Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+		//Vector2 focusPos = FocusProvider.GetFocusPosition();
 
-		return (focusPos - screenPos).magnitude;
+		return FocusProvider.GetFocusDistance(transform.position);
+
+		//return (focusPos - screenPos).magnitude;
 	}
-
-	private Vector3 GetFocusPosition()
+*/
+	/*private Vector3 GetFocusPosition()
 	{
 		// Use mouse position for now
 		return Input.mousePosition;
-	}
+	}*/
 
 	private int DetermineWantedLOD()
 	{
-		float distanceToFocus = GetDistanceToFocus();
+		float distanceToFocus = FocusProvider.GetFocusDistance(transform.position);//GetDistanceToFocus();
 		if(distanceToFocus < tempThresholdPixelCount)
 		{
 			return 200;

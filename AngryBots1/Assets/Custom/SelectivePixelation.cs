@@ -29,23 +29,9 @@ public class SelectivePixelation : MonoBehaviour {
 		} 
 	}
 
-	private Vector2 GetNormalizedFocus()
-	{
-		// For now, use mouse pos:
-		return GetNormalizedMousePosition();
-	}
-
-	private Vector2 GetNormalizedMousePosition()
-	{
-		float mouseX = Input.mousePosition.x / Screen.width;
-		float mouseY = Input.mousePosition.y / Screen.height;
-
-		return new Vector2(mouseX, mouseY);
-	}
-
 	void OnRenderImage(RenderTexture source, RenderTexture dest)
 	{
-		Vector2 focus = GetNormalizedFocus();
+		Vector2 focus = FocusProvider.GetNormalizedFocusPosition();
 
 		// Establish temp buffer for lo-res frame 
 		RenderTexture loResBuffer = RenderTexture.GetTemporary(
