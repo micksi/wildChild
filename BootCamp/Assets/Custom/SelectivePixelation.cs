@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 //[AddComponentMenu("Image Effects/Blur/Blur")]
 public class SelectivePixelation : MonoBehaviour {
 

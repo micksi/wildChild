@@ -35,7 +35,7 @@ public class ScreenFade : MonoBehaviour {
 		{
 			Blink(6);
 		}
-		else if(Input.GetKey("p"))
+		else if(Input.GetKey("k"))
 		{
 			FadeOutIn(24,24);
 		}	
