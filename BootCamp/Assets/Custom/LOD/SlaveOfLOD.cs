@@ -6,26 +6,26 @@ public class SlaveOfLOD : MonoBehaviour {
 	private Shader shader;
 
 	private static float thresholdRadius = 0.2f;
+	private static float thresholdRadiusSqr;
 
 	void Start () 
 	{
+		thresholdRadiusSqr = thresholdRadius * thresholdRadius;
 		shader = renderer.material.shader;		
 	}
 
 	private int DetermineWantedLOD()
 	{
-		float distance = FocusProvider.GetNormalizedFocusDistance(transform.position);
+		float distanceSqr = FocusProvider.GetNormalizedFocusDistanceSquared(transform.position);
 
-		if(distance < thresholdRadius)
+		if(distanceSqr < thresholdRadiusSqr)
 		{
-			//renderer.enabled = true;
-			return 1000;
+			return 600;
 
 		}
 		else
 		{
-			//renderer.enabled = false;
-			return 101;
+			return 200;
 		}
 	}
 	

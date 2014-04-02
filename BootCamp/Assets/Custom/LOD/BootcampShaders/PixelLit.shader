@@ -1,4 +1,4 @@
-﻿Shader "Custom/Bumped specular" {
+﻿Shader "Custom/PixelLit" {
 	Properties {
 		_Color ("Main Color", Color) = (1,1,1,1)
 		_SpecularColor ("Specular Color", Color) = (0.5,0.5,0.5,1)
@@ -23,6 +23,23 @@
 
 	ENDCG
 
+	// For fun lights
+	SubShader {
+		Tags { "RenderType" = "Opaque" }
+		CGPROGRAM
+		#pragma surface surf Lambert
+		
+		struct Input {
+        	float2 uv_MainTex;
+      	};
+
+		void surf (Input IN, inout SurfaceOutput o) {
+			o.Albedo = float3(1,0,0);
+		}
+
+		ENDCG
+    }
+
 	// Pixel lighting
 	SubShader {
 		Tags { "RenderType" = "Opaque" }
@@ -38,38 +55,17 @@
       	};
 
 		void surf (Input IN, inout SurfaceOutput o) {
-			o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb;
+			o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb * _Color.rgb * 0.85f;
 			o.Normal = UnpackNormal (tex2D (_BumpMap, IN.uv_BumpMap));
 			o.Specular = _SpecularColor;
-			o.Emission = texCUBE (_Cube, WorldReflectionVector (IN, o.Normal)).rgb * 0.1;
+			o.Emission = texCUBE (_Cube, WorldReflectionVector (IN, o.Normal)).rgb * 0.2;
+			// Use gloss for reflection??
+			//o.Gloss = texCUBE (_Cube, WorldReflectionVector (IN, o.Normal)).rgb;// * 0.2;
+
 		}
 
 		ENDCG
     }
-
-	// Vertex lighting
-	SubShader {
-		Tags { "RenderType"="Opaque" }
-        Pass {
-            Material {
-                Diffuse [_Color]
-                Ambient [_Color]
-                Shininess [_Shininess]
-                Specular [_SpecularColor]
-                Emission [_Cube]
-            }
-            Lighting On
-            SeparateSpecular On
-            SetTexture [_MainTex] {
-                Combine texture * primary DOUBLE, texture * primary
-            }
-            SetTexture [_Cube] {
-            	constantColor[_ReflectColor]
-                Combine constant * texture + previous, previous
-            }
-        }
-
-    }
-
+    
     FallBack "VertexLit"
 }
