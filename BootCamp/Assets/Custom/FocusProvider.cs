@@ -4,8 +4,14 @@ using System;
 
 public static class FocusProvider {
 
-	public static bool useMouse = false;
-	public static bool useCentre = true;
+	public enum Source { Mouse, ScreenCentre, Gaze };
+	public static Source source = Source.ScreenCentre;
+
+	private static Camera _cam = null;
+	private static Camera cam
+	{
+		get { if(!_cam) _cam = Camera.main; return _cam; }
+	}
 
 	// Distance
 	public static float GetFocusDistance(Vector3 fromWorldPosition)
@@ -59,20 +65,17 @@ public static class FocusProvider {
 	// Focus position
 	public static Vector2 GetFocusPosition()
 	{
-		Vector2 focus;
-		if(useMouse)
+		switch(source)
 		{
-			focus = (Vector2)Input.mousePosition;
+			case Source.Mouse:
+				return (Vector2)Input.mousePosition;
+			case Source.ScreenCentre:
+				return new Vector2(cam.pixelWidth / 2, cam.pixelHeight / 2);
+			case Source.Gaze:
+				throw new NotImplementedException("Gaze focus point functionality not implemented yet!");
+			default:
+				return new Vector2(-1, -1);
 		}
-		else if(useCentre)
-		{
-			Camera cam = Camera.main;
-			focus = new Vector2(cam.pixelWidth / 2, cam.pixelHeight / 2);
-		}
-		else
-			throw new NotImplementedException("Gaze focus point functionality not implemented yet!");
-		
-		return focus;
 	}
 
 	public static Vector3 GetFocusDirection()

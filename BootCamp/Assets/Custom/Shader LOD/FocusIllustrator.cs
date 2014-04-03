@@ -17,7 +17,7 @@ public class FocusIllustrator : MonoBehaviour {
 		points = new GameObject[noOfPoints];
 		for(int i = 0; i < noOfPoints; i++)
 		{
-			points[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			points[i] = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			points[i].renderer.material.color = Color.yellow;
 			points[i].transform.localScale = new Vector3(0.01f,0.01f,0.01f);
 		}
