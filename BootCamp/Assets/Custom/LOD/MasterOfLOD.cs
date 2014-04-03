@@ -21,9 +21,9 @@ public class MasterOfLOD : MonoBehaviour {
 		Shader ourShader = Shader.Find("Custom/Bumped specular");
 		
 		if(!lowShader)
-			lowShader = Shader.Find("Custom/VertexLit");
+			lowShader = Shader.Find("VertexLit");//Shader.Find("Custom/VertexLit");
 		if(!highShader)
-			highShader = Shader.Find("Custom/PixelLit");
+			highShader = Shader.Find("Reflective/Bumped Specular");//Shader.Find("Custom/PixelLit");
 
 		List<GameObject> ourGOs = new List<GameObject>(objects.Length/2);
 
@@ -73,7 +73,8 @@ public class MasterOfLOD : MonoBehaviour {
 			//IsInFocusAreaBoundsTest(go, new Vector2(0,0), 1f);
 			// TODO debugging functionality
 			Vector3 debuggingVec;
-			if(IsInFocusAreaBoundsTest(go, focus, hiLODAngleRadians, out debuggingVec))//IsInFocusAreaSimple(go, focus, focusDotProductMin))
+			if(keydown)
+			//if(IsInFocusAreaBoundsTest(go, focus, hiLODAngleRadians, out debuggingVec))//IsInFocusAreaSimple(go, focus, focusDotProductMin))
 			{
 				go.renderer.material.shader = highShader;
 				//Debug.DrawLine(camPos, go.transform.position, Color.red);

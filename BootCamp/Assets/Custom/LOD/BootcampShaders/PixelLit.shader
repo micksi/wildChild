@@ -24,7 +24,7 @@
 	ENDCG
 
 	// For fun lights
-	SubShader {
+	/*SubShader {
 		Tags { "RenderType" = "Opaque" }
 		CGPROGRAM
 		#pragma surface surf Lambert
@@ -38,7 +38,7 @@
 		}
 
 		ENDCG
-    }
+    }*/
 
 	// Pixel lighting
 	SubShader {

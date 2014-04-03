@@ -24,7 +24,7 @@
 	ENDCG
 
 	// Blue surface
-    SubShader {
+    /*SubShader {
 		Tags { "RenderType" = "Opaque" }
 		CGPROGRAM
 		#pragma surface surf Lambert
@@ -48,7 +48,7 @@
                 Diffuse [_Color]
             }
         }
-    }
+    }*/
 
 	// Vertex lighting
 	SubShader {
@@ -63,7 +63,7 @@
                 Emission [_Cube]
             }
             Lighting On
-            SeparateSpecular On
+           // SeparateSpecular On
             SetTexture [_MainTex] {
                 Combine texture * primary DOUBLE, texture * primary
             }
