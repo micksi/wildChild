@@ -1,4 +1,6 @@
-﻿Shader "Custom/Bumped specular" {
+﻿// As of 2014-04-03, this is only used to fill out space on objects
+// with dynamic shading quality
+Shader "Custom/Bumped specular" {
 	Properties {
 		_Color ("Main Color", Color) = (1,1,1,1)
 		_SpecularColor ("Specular Color", Color) = (0.5,0.5,0.5,1)
