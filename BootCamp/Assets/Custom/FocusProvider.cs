@@ -13,6 +13,12 @@ public static class FocusProvider {
 		get { if(!_cam) _cam = Camera.main; return _cam; }
 	}
 
+	private static GazeWrap _gazeScript = null;
+	private static GazeWrap gazeScript
+	{
+		get { if(!_gazeScript) _gazeScript = cam.GetComponent(typeof(GazeWrap)) as GazeWrap; return _gazeScript; }
+	}
+
 	// Distance
 	public static float GetFocusDistance(Vector3 fromWorldPosition)
 	{
@@ -64,7 +70,12 @@ public static class FocusProvider {
 
 	// Focus position
 	public static Vector2 GetFocusPosition()
-	{
+	{	
+		if(source == Source.Gaze && !gazeScript)
+		{
+			source = Source.ScreenCentre;
+		}
+		
 		switch(source)
 		{
 			case Source.Mouse:
@@ -72,7 +83,8 @@ public static class FocusProvider {
 			case Source.ScreenCentre:
 				return new Vector2(cam.pixelWidth / 2, cam.pixelHeight / 2);
 			case Source.Gaze:
-				throw new NotImplementedException("Gaze focus point functionality not implemented yet!");
+				return gazeScript.GetGazeScreenPosition();
+				//throw new NotImplementedException("Gaze focus point functionality not implemented yet!");
 			default:
 				return new Vector2(-1, -1);
 		}
