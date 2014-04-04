@@ -10,8 +10,12 @@ public class MasterOfLOD : MonoBehaviour {
 	public FocusProvider.Source focusSource = FocusProvider.Source.ScreenCentre;
 	
 	public bool debug = false;
+	public bool showFocusArea = false;
 
 	private GameObject[] customGOs;
+
+	// TODO use Screen.dpi, user distance to screen, and wanted focus 
+	// radius in degrees to establish in-game focus area
 
 	// Storing reference to main camera, rather than accessing it 1k times each frame,
 	// improved FPS by around 2x
@@ -53,7 +57,10 @@ public class MasterOfLOD : MonoBehaviour {
 		{
 			print(objects.Length + " GameObjects found.");
 			print(customGOs.Length + " GameObjects with gaze-contingent shading found.");
-			gameObject.AddComponent("FocusIllustrator");
+		}
+		if(showFocusArea)
+		{
+			gameObject.AddComponent("FocusIllustrator");			
 		}
 	}
 
@@ -72,6 +79,19 @@ public class MasterOfLOD : MonoBehaviour {
 
 		foreach(GameObject go in customGOs)
 		{
+			if(debug)
+			{
+				if(Input.GetKey("l"))
+				{
+					go.renderer.material.shader = highShader;
+					continue;
+				}
+				else
+				{
+					go.renderer.material.shader = lowShader;
+					continue;
+				}
+			}
 			if(IsInFocusAreaBoundsTest(go, focus, hiLODAngleRadians, cosFocusAngle))
 			{
 				go.renderer.material.shader = highShader;
