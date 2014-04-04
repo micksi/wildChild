@@ -89,4 +89,21 @@ public static class FocusProvider {
 		Vector2 pixelFocus = GetFocusPosition();
 		return NormalizeScreenPosition(pixelFocus);
 	}
+
+
+
+	public static float GetFocusRadiusPixels(float userDistanceCentimetres, float focusAngleDegrees)
+	{
+		// Radius on screen in pixels = tan(angle of view) * distance to user * DPI of screen
+		float radiusCM = Mathf.Tan(focusAngleDegrees * Mathf.Deg2Rad) * userDistanceCentimetres;
+		float radiusInches = radiusCM * 0.393701f;
+		float dpi = Screen.dpi;
+		if(dpi < 1f) // Screen.dpi probably couldn't be determined
+		{
+			dpi = 110.267f; // Thorbjørns computer's DPI
+		}	
+		float radiusPixels = radiusInches * dpi;
+
+		return radiusPixels;
+	}
 }

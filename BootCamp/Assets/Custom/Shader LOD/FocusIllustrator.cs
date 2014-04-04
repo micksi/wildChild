@@ -23,13 +23,12 @@ public class FocusIllustrator : MonoBehaviour {
 		}
 
 		mol = GetComponent<MasterOfLOD>();
-
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		Vector3 focus = FocusProvider.GetFocusDirection();
-		float focusAngle = mol.hiLODAngleRadians;
+		float focusAngle = mol.ingameFocusRadiusRadians;
 
 		Vector3 edge = Vector3.RotateTowards(focus, Camera.main.transform.up, focusAngle, 1).normalized;
 		Vector3 edgeParallel = focus * Vector3.Dot(edge, focus);

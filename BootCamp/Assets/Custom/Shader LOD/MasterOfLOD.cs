@@ -3,8 +3,16 @@ using System.Collections.Generic;
 
 public class MasterOfLOD : MonoBehaviour {
 
-	[Range(0.0F, 1.571F)]
-	public float hiLODAngleRadians = 0.25f;
+	private float _ingameFocusRadiusRadians = 0.25f;
+	public float ingameFocusRadiusRadians
+	{
+		get;
+		private set;
+	}
+
+	public float userDistanceCM = 60f;
+	[Range(0.0F, 50.0F)]
+	public float userFocusRadiusAngleDegrees = 10f;
 
 	public Shader lowShader, highShader;
 	public FocusProvider.Source focusSource = FocusProvider.Source.ScreenCentre;
@@ -13,9 +21,6 @@ public class MasterOfLOD : MonoBehaviour {
 	public bool showFocusArea = false;
 
 	private GameObject[] customGOs;
-
-	// TODO use Screen.dpi, user distance to screen, and wanted focus 
-	// radius in degrees to establish in-game focus area
 
 	// Storing reference to main camera, rather than accessing it 1k times each frame,
 	// improved FPS by around 2x
@@ -35,6 +40,7 @@ public class MasterOfLOD : MonoBehaviour {
 
 		List<GameObject> ourGOs = new List<GameObject>(objects.Length/2);
 
+		// Get gameobjects with our placeholder shader
 		foreach(Object o in objects)
 		{
 			if(o is GameObject)
@@ -53,10 +59,13 @@ public class MasterOfLOD : MonoBehaviour {
 		customGOs = ourGOs.ToArray();
 		mainCam = Camera.main;
 
+		ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
+
 		if(debug)
 		{
 			print(objects.Length + " GameObjects found.");
 			print(customGOs.Length + " GameObjects with gaze-contingent shading found.");
+			print("ingameFocusRadiusRadians: " + ingameFocusRadiusRadians);
 		}
 		if(showFocusArea)
 		{
@@ -66,7 +75,9 @@ public class MasterOfLOD : MonoBehaviour {
 
 	void Update()
 	{
-		float focusDotProductMin = Mathf.Cos(hiLODAngleRadians);
+		//ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
+
+		float focusDotProductMin = Mathf.Cos(ingameFocusRadiusRadians);
 		FocusProvider.source = focusSource;
 
 		// Get focus direction vector
@@ -75,7 +86,7 @@ public class MasterOfLOD : MonoBehaviour {
 		// Compare each shaded object's centre dir from cam with focus dir	
 		Vector3 objectDir;
 		Vector3 camPos = Camera.main.transform.position;
-		float cosFocusAngle = Mathf.Cos(hiLODAngleRadians);
+		float cosFocusAngle = Mathf.Cos(ingameFocusRadiusRadians);
 
 		foreach(GameObject go in customGOs)
 		{
@@ -92,7 +103,7 @@ public class MasterOfLOD : MonoBehaviour {
 					continue;
 				}
 			}
-			if(IsInFocusAreaBoundsTest(go, focus, hiLODAngleRadians, cosFocusAngle))
+			if(IsInFocusAreaBoundsTest(go, focus, ingameFocusRadiusRadians, cosFocusAngle))
 			{
 				go.renderer.material.shader = highShader;
 			}
@@ -130,5 +141,24 @@ public class MasterOfLOD : MonoBehaviour {
 			Ray ray = new Ray(mainCam.transform.position, towardsObject);
 			return g.renderer.bounds.IntersectRay(ray);
 		}
+	}
+
+	private float GetIngameFocusRadiusRadians()
+	{
+		//float focusRadiusPixels = FocusProvider.GetFocusRadiusPixels(userDistanceCM, userFocusRadiusAngleDegrees);
+		//Vector3 focusEdgePoint = new Vector3(1440 / 2 - focusRadiusPixels, 9)
+
+		float focusRadiusPixels = FocusProvider.GetFocusRadiusPixels(userDistanceCM, userFocusRadiusAngleDegrees);
+		Ray focusEdgeRay = mainCam.ScreenPointToRay(new Vector3(Screen.width / 2 + focusRadiusPixels, Screen.height / 2, 0));
+		Vector3 focusEdge = focusEdgeRay.direction;
+
+		if(debug)
+		{ 
+			print("Screen res: " + Screen.currentResolution.width + ", " + Screen.currentResolution.width);
+			print("focusRadiusPixels: " + focusRadiusPixels);
+			print("In-game radius angle in degrees" + Vector3.Angle(mainCam.transform.forward, focusEdge));
+		}
+
+		return Vector3.Angle(mainCam.transform.forward, focusEdge) * Mathf.Deg2Rad;
 	}
 }
