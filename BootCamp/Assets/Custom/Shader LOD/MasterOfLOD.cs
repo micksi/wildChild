@@ -33,9 +33,9 @@ public class MasterOfLOD : MonoBehaviour {
 
 		Shader ourShader = Shader.Find("Custom/Bumped specular");
 		
-		if(!lowShader)
+		if(lowShader == null)
 			lowShader = Shader.Find("VertexLit");
-		if(!highShader)
+		if(highShader == null)
 			highShader = Shader.Find("Reflective/Bumped Specular");
 
 		List<GameObject> ourGOs = new List<GameObject>(objects.Length/2);
