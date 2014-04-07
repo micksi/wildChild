@@ -25,6 +25,22 @@ public class FocusIllustrator : MonoBehaviour {
 		mol = GetComponent<MasterOfLOD>();
 	}
 	
+	public void Enable()
+	{
+		foreach(GameObject p in points)
+		{
+			p.SetActive(true);
+		}
+	}
+
+	public void Disable()
+	{
+		foreach(GameObject p in points)
+		{
+			p.SetActive(false);
+		}
+	}
+
 	// Update is called once per frame
 	void Update () {
 		Vector3 focus = FocusProvider.GetFocusDirection();

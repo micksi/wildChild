@@ -19,10 +19,10 @@ public class MasterOfLOD : MonoBehaviour {
 	public FocusProvider.Source focusSource = FocusProvider.Source.ScreenCentre;
 	
 	// When true, hold L down to use highShader, do not to use lowShader.
-	// Logs some info to debug console, too.
-	public bool debug = false; 
+	// Logs some info to overrideShaderSelection console, too.
+	public bool overrideShaderSelection = false; 
 
-	// Displays focus area in game view. A bit heavy on performance.
+	// Displays focus area in game view when N is pressed. A bit heavy on performance.
 	public bool showFocusArea = false; 
 
 	// The list of GameObjects on which the shader depends on whether or not they are 
@@ -78,7 +78,7 @@ public class MasterOfLOD : MonoBehaviour {
 		cam = Camera.main;
 		ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
 
-		if(debug)
+		if(overrideShaderSelection)
 		{
 			print(objects.Length + " GameObjects found.");
 			print(affectedGameObjects.Length + " GameObjects with gaze-contingent shading found.");
@@ -100,14 +100,25 @@ public class MasterOfLOD : MonoBehaviour {
 
 		// Get focus radius
 		ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
-
 		float cosFocusAngle = Mathf.Cos(ingameFocusRadiusRadians);
+
+		if(showFocusArea)
+		{
+			if(Input.GetKeyDown("n"))
+			{
+				GetComponent<FocusIllustrator>().Enable();
+			}
+			else if(Input.GetKeyUp("n"))
+			{
+				GetComponent<FocusIllustrator>().Disable();
+			}
+		}
 
 		// Decide, for each object, whether to use high quality shader or low quality shader
 		foreach(GameObject go in affectedGameObjects)
 		{
 			// Ignore focus area and all that jazz - just draw everything with one of the shaders
-			if(debug) 
+			if(overrideShaderSelection) 
 			{
 				if(Input.GetKey("l"))
 				{
@@ -182,7 +193,7 @@ public class MasterOfLOD : MonoBehaviour {
 			);
 		Vector3 focusEdge = focusEdgeRay.direction;
 
-		if(debug)
+		if(overrideShaderSelection)
 		{ 
 			print("Screen res: " + Screen.currentResolution.width + ", " + Screen.currentResolution.width);
 			print("focusRadiusPixels: " + focusRadiusPixels);
