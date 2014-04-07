@@ -22,6 +22,8 @@ public class MasterOfLOD : MonoBehaviour {
 	// Logs some info to overrideShaderSelection console, too.
 	public bool overrideShaderSelection = false; 
 
+	public bool debug = false;
+
 	// Displays focus area in game view when N is pressed. A bit heavy on performance.
 	public bool showFocusArea = false; 
 
@@ -78,7 +80,7 @@ public class MasterOfLOD : MonoBehaviour {
 		cam = Camera.main;
 		ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
 
-		if(overrideShaderSelection)
+		if(debug)
 		{
 			print(objects.Length + " GameObjects found.");
 			print(affectedGameObjects.Length + " GameObjects with gaze-contingent shading found.");
@@ -193,7 +195,7 @@ public class MasterOfLOD : MonoBehaviour {
 			);
 		Vector3 focusEdge = focusEdgeRay.direction;
 
-		if(overrideShaderSelection)
+		if(debug)
 		{ 
 			print("Screen res: " + Screen.currentResolution.width + ", " + Screen.currentResolution.width);
 			print("focusRadiusPixels: " + focusRadiusPixels);
