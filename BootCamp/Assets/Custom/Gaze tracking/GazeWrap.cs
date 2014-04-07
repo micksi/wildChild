@@ -49,25 +49,14 @@ public class GazeWrap : MonoBehaviour, IGazeListener
     void OnGUI()
     {
         int padding = 10;
-        int btnWidth = 100;
-        int btnHeight = 30;
-        int y = padding;
-
-        /*if (GUI.Button(new Rect(padding, y, btnWidth, btnHeight), "Press to Exit"))
-        {
-            Application.Quit();
-        }*/
 
         if (!GazeManager.Instance.IsConnected)
         {
-            y += btnHeight + padding;
-            GUI.TextArea(new Rect(padding, y, 200, 20), "EyeTribe Server not running!");
+            GUI.TextArea(new Rect(padding, padding, 200, 20), "EyeTribe Server not running!");
         }
-        else
-        if (!GazeManager.Instance.IsCalibrated)
+        else if (!GazeManager.Instance.IsCalibrated)
         {
-            y += btnHeight + padding;
-            GUI.TextArea(new Rect(padding, y, 200, 20), "EyeTribe Server not calibrated!");
+            GUI.TextArea(new Rect(padding, padding, 200, 20), "EyeTribe Server not calibrated!");
         }
     }
 

@@ -3,42 +3,56 @@ using System.Collections.Generic;
 
 public class MasterOfLOD : MonoBehaviour {
 
-	private float _ingameFocusRadiusRadians = 0.25f;
+	// User's distance from the screen, in centimetres
+	public float userDistanceCM = 60f;
+	[Range(0.0F, 50.0F)]
+
+	// The user's physical FOV focus radius, in degrees
+	public float userFocusRadiusAngleDegrees = 10f;
+
+	public Shader lowShader, highShader;
+
+	// The source of our focus data. Default to Screen centre.
+	public FocusProvider.Source focusSource = FocusProvider.Source.ScreenCentre;
+	
+	// When true, hold L down to use highShader, do not to use lowShader.
+	// Logs some info to debug console, too.
+	public bool debug = false; 
+
+	// Displays focus area in game view. A bit heavy on performance.
+	public bool showFocusArea = false; 
+
+	// The list of GameObjects on which the shader depends on whether or not they are 
+	// in focus.
+	private GameObject[] affectedGameObjects;
+
+	// Storing reference to main camera, rather than accessing it 1k times each frame,
+	// improved FPS by around 2x
+	private static Camera cam;
+
+	// The focus radius, in radians, that will be used when 
+	// determining what objects use what shader
 	public float ingameFocusRadiusRadians
 	{
 		get;
 		private set;
 	}
 
-	public float userDistanceCM = 60f;
-	[Range(0.0F, 50.0F)]
-	public float userFocusRadiusAngleDegrees = 10f;
-
-	public Shader lowShader, highShader;
-	public FocusProvider.Source focusSource = FocusProvider.Source.ScreenCentre;
-	
-	public bool debug = false;
-	public bool showFocusArea = false;
-
-	private GameObject[] customGOs;
-
-	// Storing reference to main camera, rather than accessing it 1k times each frame,
-	// improved FPS by around 2x
-	private static Camera mainCam;
-
 	// Use this for initialization
 	void Start () {
-		// Get ALL GameObjects
-		Object[] objects = GameObject.FindObjectsOfType<GameObject>();
-
-		Shader ourShader = Shader.Find("Custom/Bumped specular");
+		// Initiate shaders
+		Shader placeholder = Shader.Find("Custom/Bumped specular");
 		
 		if(lowShader == null)
 			lowShader = Shader.Find("VertexLit");
 		if(highShader == null)
 			highShader = Shader.Find("Reflective/Bumped Specular");
 
-		List<GameObject> ourGOs = new List<GameObject>(objects.Length/2);
+		// Get ALL GameObjects
+		Object[] objects = GameObject.FindObjectsOfType<GameObject>();
+
+		// Create list for GameObjects that have the placeholder shader
+		List<GameObject> gameObjectsWithPlaceholder = new List<GameObject>(objects.Length/2);
 
 		// Get gameobjects with our placeholder shader
 		foreach(Object o in objects)
@@ -48,23 +62,23 @@ public class MasterOfLOD : MonoBehaviour {
 				GameObject go = (GameObject)o;
 				if(go.renderer)
 				{
-					if(go.renderer.material.shader == ourShader)
+					if(go.renderer.material.shader == placeholder)
 					{
-						ourGOs.Add(go);
+						gameObjectsWithPlaceholder.Add(go);
 					}
 				}
 			}
 		}
 
-		customGOs = ourGOs.ToArray();
-		mainCam = Camera.main;
-
+		affectedGameObjects = gameObjectsWithPlaceholder.ToArray();
+		
+		cam = Camera.main;
 		ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
 
 		if(debug)
 		{
 			print(objects.Length + " GameObjects found.");
-			print(customGOs.Length + " GameObjects with gaze-contingent shading found.");
+			print(affectedGameObjects.Length + " GameObjects with gaze-contingent shading found.");
 			print("ingameFocusRadiusRadians: " + ingameFocusRadiusRadians);
 		}
 		if(showFocusArea)
@@ -75,22 +89,19 @@ public class MasterOfLOD : MonoBehaviour {
 
 	void Update()
 	{
-		//ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
-
-		float focusDotProductMin = Mathf.Cos(ingameFocusRadiusRadians);
+		// Update FocusProvider's source setting (mouse, gaze, centre of screen...)
 		FocusProvider.source = focusSource;
 
 		// Get focus direction vector
 		Vector3 focus = FocusProvider.GetFocusDirection();
 
-		// Compare each shaded object's centre dir from cam with focus dir	
-		Vector3 objectDir;
-		Vector3 camPos = Camera.main.transform.position;
 		float cosFocusAngle = Mathf.Cos(ingameFocusRadiusRadians);
 
-		foreach(GameObject go in customGOs)
+		// Decide, for each object, whether to use high quality shader or low quality shader
+		foreach(GameObject go in affectedGameObjects)
 		{
-			if(debug)
+			// Ignore focus area and all that jazz - just draw everything with one of the shaders
+			if(debug) 
 			{
 				if(Input.GetKey("l"))
 				{
@@ -103,6 +114,7 @@ public class MasterOfLOD : MonoBehaviour {
 					continue;
 				}
 			}
+
 			if(IsInFocusAreaBoundsTest(go, focus, ingameFocusRadiusRadians, cosFocusAngle))
 			{
 				go.renderer.material.shader = highShader;
@@ -114,19 +126,20 @@ public class MasterOfLOD : MonoBehaviour {
 		}
 	}
 
+	// Tests whether the transform position is within the focus cone
 	private bool IsInFocusAreaSimple(GameObject g, Vector3 focusDirection, float cosFocusRadiusAngle)
 	{
-		Vector3 objectDir = g.transform.position - mainCam.transform.position;
+		Vector3 objectDir = g.transform.position - cam.transform.position;
 		objectDir.Normalize();
 		float dot = Vector3.Dot(focusDirection, objectDir);
 
 		return (dot > cosFocusRadiusAngle);
 	}
 
+	// Tests whether a GameObject's bounding volume is within the focus cone
 	private bool IsInFocusAreaBoundsTest(GameObject g, Vector3 focusDirection, float focusAngle, float cosFocusAngle)
 	{
-		Vector3 objectDir = g.renderer.bounds.center - mainCam.transform.position;
-		float dist = objectDir.magnitude;
+		Vector3 objectDir = g.renderer.bounds.center - cam.transform.position; // Use bounds.center, as it should give more precise centre estimate
 		objectDir.Normalize();
 
 		float dot = Vector3.Dot(focusDirection, objectDir);
@@ -137,28 +150,41 @@ public class MasterOfLOD : MonoBehaviour {
 		}
 		else
 		{
+			// Rotate the focus direction towards the object, but only up to focusAngle degrees
+			// then see if the ray in that direction intersects the bounds of the object.
+			// This is a conservative approach: We can get false positives, but not false negatives.
 			Vector3 towardsObject = Vector3.RotateTowards(focusDirection, objectDir, focusAngle, 1);
-			Ray ray = new Ray(mainCam.transform.position, towardsObject);
+			Ray ray = new Ray(cam.transform.position, towardsObject);
 			return g.renderer.bounds.IntersectRay(ray);
 		}
 	}
 
+	// Uses the user's focus angle and user distance to screen to establish what the 
+	// in-game focus angle should be to cover the pixels subtended by the user's 
+	// focus area.
 	private float GetIngameFocusRadiusRadians()
 	{
-		//float focusRadiusPixels = FocusProvider.GetFocusRadiusPixels(userDistanceCM, userFocusRadiusAngleDegrees);
-		//Vector3 focusEdgePoint = new Vector3(1440 / 2 - focusRadiusPixels, 9)
-
 		float focusRadiusPixels = FocusProvider.GetFocusRadiusPixels(userDistanceCM, userFocusRadiusAngleDegrees);
-		Ray focusEdgeRay = mainCam.ScreenPointToRay(new Vector3(Screen.width / 2 + focusRadiusPixels, Screen.height / 2, 0));
+
+		// Generate a vector on the edge of the focus area, relative to the
+		// centre of the screen (i.e. cam's forward vector)
+		Ray focusEdgeRay = cam.ScreenPointToRay
+			(
+				new Vector3(Screen.width  / 2 + focusRadiusPixels, // offset from centre by focusRadiusPixels
+							Screen.height / 2, 
+							0)
+			);
 		Vector3 focusEdge = focusEdgeRay.direction;
 
 		if(debug)
 		{ 
 			print("Screen res: " + Screen.currentResolution.width + ", " + Screen.currentResolution.width);
 			print("focusRadiusPixels: " + focusRadiusPixels);
-			print("In-game radius angle in degrees" + Vector3.Angle(mainCam.transform.forward, focusEdge));
+			print("In-game radius angle in degrees" + Vector3.Angle(cam.transform.forward, focusEdge));
 		}
 
-		return Vector3.Angle(mainCam.transform.forward, focusEdge) * Mathf.Deg2Rad;
+		// For some reason, Vector3.Angle returns degrees, not radians.
+		// Return the angle between camera forward, and that of the focus edge vector
+		return Vector3.Angle(cam.transform.forward, focusEdge) * Mathf.Deg2Rad;
 	}
 }

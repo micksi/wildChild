@@ -4,19 +4,38 @@ using System;
 
 public static class FocusProvider {
 
+	private const float CmToInch = 0.393701f;
+
 	public enum Source { Mouse, ScreenCentre, Gaze };
 	public static Source source = Source.ScreenCentre;
 
 	private static Camera _cam = null;
 	private static Camera cam
 	{
-		get { if(!_cam) _cam = Camera.main; return _cam; }
+		get { if(_cam == null) _cam = Camera.main; return _cam; }
 	}
 
 	private static GazeWrap _gazeScript = null;
 	private static GazeWrap gazeScript
 	{
-		get { if(!_gazeScript) _gazeScript = cam.GetComponent(typeof(GazeWrap)) as GazeWrap; return _gazeScript; }
+		get { if(_gazeScript == null) _gazeScript = cam.GetComponent(typeof(GazeWrap)) as GazeWrap; return _gazeScript; }
+	}
+
+	private static float _dpi = 0;
+	private static float dpi
+	{
+		get { 	if(_dpi < 1)
+				{
+					_dpi = Screen.dpi; 
+					if(_dpi < 1f) // Screen.dpi couldn't be determined
+					{
+						Debug.LogWarning("Couldn't determine display DPI, falling back to 110.267.");
+						_dpi = 110.267f; // Thorbjørn's computer's DPI
+					}	
+				}
+
+				return _dpi; 
+			}
 	}
 
 	// Distance
@@ -35,7 +54,6 @@ public static class FocusProvider {
 		return GetNormalizedFocusObjectDifference(fromWorldPosition).sqrMagnitude;
 	}
 
-
 	// Object - focus difference vectors
 	private static Vector2 GetFocusObjectDifference(Vector3 worldPosition)
 	{
@@ -47,7 +65,6 @@ public static class FocusProvider {
 		Vector2 pixelVector = GetFocusObjectDifference(worldPosition);
 		return NormalizeScreenPosition(pixelVector);
 	}
-
 
 	// Object screen position
 	private static Vector2 GetObjectScreenPosition(Vector3 worldPosition)
@@ -67,15 +84,9 @@ public static class FocusProvider {
 		return pixelPosition;
 	}
 
-
-	// Focus position
+	// Returns focus position, in pixels.
 	public static Vector2 GetFocusPosition()
 	{	
-		if(source == Source.Gaze && !gazeScript)
-		{
-			source = Source.ScreenCentre;
-		}
-		
 		switch(source)
 		{
 			case Source.Mouse:
@@ -84,7 +95,6 @@ public static class FocusProvider {
 				return new Vector2(cam.pixelWidth / 2, cam.pixelHeight / 2);
 			case Source.Gaze:
 				return gazeScript.GetGazeScreenPosition();
-				//throw new NotImplementedException("Gaze focus point functionality not implemented yet!");
 			default:
 				return new Vector2(-1, -1);
 		}
@@ -102,18 +112,12 @@ public static class FocusProvider {
 		return NormalizeScreenPosition(pixelFocus);
 	}
 
-
-
 	public static float GetFocusRadiusPixels(float userDistanceCentimetres, float focusAngleDegrees)
 	{
-		// Radius on screen in pixels = tan(angle of view) * distance to user * DPI of screen
-		float radiusCM = Mathf.Tan(focusAngleDegrees * Mathf.Deg2Rad) * userDistanceCentimetres;
-		float radiusInches = radiusCM * 0.393701f;
-		float dpi = Screen.dpi;
-		if(dpi < 1f) // Screen.dpi probably couldn't be determined
-		{
-			dpi = 110.267f; // Thorbjørns computer's DPI
-		}	
+		// Radius on screen in pixels is equal to
+		// tan(angle of view) * distance to user * DPI of screen
+		float radiusCentimetres = Mathf.Tan(focusAngleDegrees * Mathf.Deg2Rad) * userDistanceCentimetres;
+		float radiusInches = radiusCentimetres * CmToInch; 	
 		float radiusPixels = radiusInches * dpi;
 
 		return radiusPixels;
