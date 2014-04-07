@@ -38,7 +38,8 @@ public static class FocusProvider {
 			}
 	}
 
-	// Distance
+
+	// Pixel distance between focus point and object point on screen
 	public static float GetFocusDistance(Vector3 fromWorldPosition)
 	{
 		return GetFocusObjectDifference(fromWorldPosition).magnitude;
@@ -66,19 +67,17 @@ public static class FocusProvider {
 		return NormalizeScreenPosition(pixelVector);
 	}
 
-	// Object screen position
+	// Returns world position's screen position, in pixels
 	private static Vector2 GetObjectScreenPosition(Vector3 worldPosition)
 	{
-		Camera cam = Camera.main;
 		Vector3 screenPos = cam.WorldToScreenPoint(worldPosition);
 		return new Vector2(screenPos.x, screenPos.y);
 	}
 
 	// Transform a position from coordinates in pixels to normalized
-	// screen coordinates.
+	// screen coordinates [0;1].
 	private static Vector2 NormalizeScreenPosition(Vector2 pixelPosition)
 	{
-		Camera cam = Camera.main;
 		pixelPosition.x /= cam.pixelWidth;
 		pixelPosition.y /= cam.pixelHeight;
 		return pixelPosition;
@@ -103,9 +102,10 @@ public static class FocusProvider {
 	public static Vector3 GetFocusDirection()
 	{
 		Vector2 focusPoint = GetFocusPosition();
-		return Camera.main.ScreenPointToRay(new Vector3(focusPoint.x, focusPoint.y, 0)).direction;
+		return cam.ScreenPointToRay(new Vector3(focusPoint.x, focusPoint.y, 0)).direction;
 	}
 
+	// Get focus position where x, y = [0;1]
 	public static Vector2 GetNormalizedFocusPosition()
 	{
 		Vector2 pixelFocus = GetFocusPosition();

@@ -4,12 +4,15 @@ using System.Collections.Generic;
 public class MasterOfLOD : MonoBehaviour {
 
 	// User's distance from the screen, in centimetres
-	public float userDistanceCM = 60f;
+	public float userDistanceCentimetres = 60f;
 	[Range(0.0F, 50.0F)]
 
 	// The user's physical FOV focus radius, in degrees
 	public float userFocusRadiusAngleDegrees = 10f;
 
+	// The shaders that we're switching between.
+	// High is used when object is in focus area,
+	// low otherwise.
 	public Shader lowShader, highShader;
 
 	// The source of our focus data. Default to Screen centre.
@@ -95,6 +98,9 @@ public class MasterOfLOD : MonoBehaviour {
 		// Get focus direction vector
 		Vector3 focus = FocusProvider.GetFocusDirection();
 
+		// Get focus radius
+		ingameFocusRadiusRadians = GetIngameFocusRadiusRadians();
+
 		float cosFocusAngle = Mathf.Cos(ingameFocusRadiusRadians);
 
 		// Decide, for each object, whether to use high quality shader or low quality shader
@@ -164,7 +170,7 @@ public class MasterOfLOD : MonoBehaviour {
 	// focus area.
 	private float GetIngameFocusRadiusRadians()
 	{
-		float focusRadiusPixels = FocusProvider.GetFocusRadiusPixels(userDistanceCM, userFocusRadiusAngleDegrees);
+		float focusRadiusPixels = FocusProvider.GetFocusRadiusPixels(userDistanceCentimetres, userFocusRadiusAngleDegrees);
 
 		// Generate a vector on the edge of the focus area, relative to the
 		// centre of the screen (i.e. cam's forward vector)
