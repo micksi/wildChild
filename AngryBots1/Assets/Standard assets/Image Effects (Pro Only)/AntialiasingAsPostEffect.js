@@ -95,7 +95,15 @@ class AntialiasingAsPostEffect extends PostEffectsBase  {
 		
 		return isSupported;		            
 	}
+	
+	function GetNormalizedMousePosition()
+	{
+		var mouseX = Input.mousePosition.x / Screen.width;
+		var mouseY = Input.mousePosition.y / Screen.height;
 
+		return new Vector2(mouseX, mouseY);
+	}
+	
 	function OnRenderImage (source : RenderTexture, destination : RenderTexture) {
 		if(CheckResources()==false) {
 			Graphics.Blit (source, destination);
@@ -109,7 +117,11 @@ class AntialiasingAsPostEffect extends PostEffectsBase  {
 			materialFXAAIII.SetFloat("_EdgeThresholdMin", edgeThresholdMin);
 			materialFXAAIII.SetFloat("_EdgeThreshold", edgeThreshold);
 			materialFXAAIII.SetFloat("_EdgeSharpness", edgeSharpness);		
-		
+			var center = this.GetNormalizedMousePosition();
+			materialFXAAIII.SetFloat("_CenterX", center.x);
+			materialFXAAIII.SetFloat("_CenterY", center.y);
+			
+			
             Graphics.Blit (source, destination, materialFXAAIII);
         }        
 		else if (mode == AAMode.FXAA1PresetB && (materialFXAAPreset3 != null)) {

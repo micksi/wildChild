@@ -34,6 +34,8 @@ Shader "Hidden/FXAA III (Console)" {
 		_EdgeThresholdMin ("Edge threshold min",float) = 0.125
 		_EdgeThreshold("Edge Threshold", float) = 0.25
 		_EdgeSharpness("Edge sharpness",float) = 4.0
+		_CenterX("Center X", float) = 0.0
+		_CenterY("Center Y", float) = 0.0
 	}
 	SubShader {
 		Pass {
@@ -54,9 +56,12 @@ Shader "Hidden/FXAA III (Console)" {
 		uniform half _EdgeThresholdMin;
 		uniform half _EdgeThreshold;
 		uniform half _EdgeSharpness;
+		uniform half _CenterX;
+		uniform half _CenterY;
 
 		struct v2f {
 			float4 pos : SV_POSITION;
+			float4 screen_pos : TEXCOORD4;
 			float2 uv : TEXCOORD0;
 			float4 interpolatorA : TEXCOORD1;
 			float4 interpolatorB : TEXCOORD2;
@@ -69,7 +74,7 @@ Shader "Hidden/FXAA III (Console)" {
 		{
 			v2f o;
 			o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
-			
+			o.screen_pos = o.pos;
 			o.uv = v.texcoord.xy;
 			
 			float4 extents;
@@ -160,8 +165,22 @@ Shader "Hidden/FXAA III (Console)" {
 
 		half4 frag (v2f i) : COLOR
 		{
-			half3 color = FxaaPixelShader(i.uv, i.interpolatorA, i.interpolatorB, i.interpolatorC);
-			return half4(color, 1.0);
+			float dist = distance(i.uv, float2(_CenterX, _CenterY));
+			float thresh = 0.4;
+			if(dist > thresh) // dont anti-alias
+			{
+				return tex2D(_MainTex, i.uv);
+			}
+			else
+			{
+				half3 color = FxaaPixelShader(i.uv, i.interpolatorA, i.interpolatorB, i.interpolatorC);
+				return half4(color, 1.0);
+			}
+			
+			
+			//half4 original = tex2D(_MainTex, i.uv);
+			//return lerp(half4(color, 1.0), original, dist);
+			//return half4(color, 1.0);
 		}
 		
 		ENDCG
