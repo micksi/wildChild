@@ -5,6 +5,10 @@ public class FingerGun : MonoBehaviour {
 	
 	Ray ray;
 	RaycastHit hit;
+
+	bool canShoot = true;
+	float counter = 0;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -14,11 +18,21 @@ public class FingerGun : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+
 		if(Input.GetMouseButtonDown(0)) //Check of shot is fired
 		{
 			OnTargetHit(Input.mousePosition); //Destroy target if hit
 		}
 
+		if(canShoot == false)
+		{
+			counter += Time.deltaTime;
+			if(counter > 0.200f)
+			{
+				canShoot = true;
+				print ("Reloaded");
+			}
+		}
 	}
 
 	void OnTargetHit(Vector3 hitPosition)
@@ -33,6 +47,16 @@ public class FingerGun : MonoBehaviour {
 				            hit.collider.gameObject.transform.position, Quaternion.identity);
 				hit.collider.gameObject.SetActive(false);
 			}
+		}
+	}
+
+	public void shoot()
+	{
+		if(canShoot == true)
+		{
+			OnTargetHit(Input.mousePosition); //Destroy target if hit
+			counter = 0;
+			canShoot = false;
 		}
 	}
 }
