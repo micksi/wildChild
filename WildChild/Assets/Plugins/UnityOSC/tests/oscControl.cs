@@ -35,7 +35,7 @@ public class oscControl : MonoBehaviour {
 	// Script initialization
 	void Start() {
 
-		gunScript = gun.GetComponent<FingerGun>();
+		gunScript = GameObject.FindWithTag("Gun").GetComponent<FingerGun>();
 		OSCHandler.Instance.Init(); //init OSC
 		servers = new Dictionary<string, ServerLog>();
 
