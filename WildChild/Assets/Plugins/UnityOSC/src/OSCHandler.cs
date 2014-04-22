@@ -291,7 +291,7 @@ public class OSCHandler : MonoBehaviour
 					}
 		
 					AddLastPacketToLog(pair.Key);
-				}
+				}	
 			}
 		}
 	}
